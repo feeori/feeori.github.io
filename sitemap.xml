@@ -1,0 +1,74 @@
+<?xml-stylesheet type="text/xsl" href="https://feeori.github.io/sitemap.xsl"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  
+  <url>
+    <loc>https://feeori.github.io/categories/</loc>
+    <lastmod>2021-02-27T10:51:16+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://feeori.github.io/tags/cdh/</loc>
+    <lastmod>2021-02-27T10:51:16+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://feeori.github.io/tags/hive/</loc>
+    <lastmod>2021-02-27T10:51:16+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://feeori.github.io/tags/mapreduce/</loc>
+    <lastmod>2021-02-27T10:51:16+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://feeori.github.io/post/0001-mapreduce-job-fail-due-to-wrong-setting/</loc>
+    <lastmod>2021-02-27T10:51:16+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://feeori.github.io/post/</loc>
+    <lastmod>2021-02-27T10:51:16+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://feeori.github.io/</loc>
+    <lastmod>2021-02-27T10:51:16+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://feeori.github.io/tags/</loc>
+    <lastmod>2021-02-27T10:51:16+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://feeori.github.io/tags/%E5%A4%A7%E6%95%B0%E6%8D%AE/</loc>
+    <lastmod>2021-02-27T10:51:16+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://feeori.github.io/categories/%E7%BA%BF%E4%B8%8A%E6%95%85%E9%9A%9C/</loc>
+    <lastmod>2021-02-27T10:51:16+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+</urlset>

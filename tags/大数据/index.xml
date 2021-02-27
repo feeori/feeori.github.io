@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>大数据 on SKY</title>
+    <link>https://feeori.github.io/tags/%E5%A4%A7%E6%95%B0%E6%8D%AE/</link>
+    <description>Recent content in 大数据 on SKY</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <lastBuildDate>Sat, 27 Feb 2021 10:51:16 +0800</lastBuildDate><atom:link href="https://feeori.github.io/tags/%E5%A4%A7%E6%95%B0%E6%8D%AE/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Mapreduce: 节点失效时，错误的配置导致Hive任务失败</title>
+      <link>https://feeori.github.io/post/0001-mapreduce-job-fail-due-to-wrong-setting/</link>
+      <pubDate>Sat, 27 Feb 2021 10:51:16 +0800</pubDate>
+      
+      <guid>https://feeori.github.io/post/0001-mapreduce-job-fail-due-to-wrong-setting/</guid>
+      <description>前言 副本（冗余）是分布式系统用来保障可靠性、可用性的基石特性。一切数据皆有副本，即使出现了单个节点失效的情况，由于有副本的存在，数据/任务的</description>
+    </item>
+    
+  </channel>
+</rss>

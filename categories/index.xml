@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Categories on SKY</title>
+    <link>https://feeori.github.io/categories/</link>
+    <description>Recent content in Categories on SKY</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <lastBuildDate>Sat, 27 Feb 2021 10:51:16 +0800</lastBuildDate><atom:link href="https://feeori.github.io/categories/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>线上故障</title>
+      <link>https://feeori.github.io/categories/%E7%BA%BF%E4%B8%8A%E6%95%85%E9%9A%9C/</link>
+      <pubDate>Sat, 27 Feb 2021 10:51:16 +0800</pubDate>
+      
+      <guid>https://feeori.github.io/categories/%E7%BA%BF%E4%B8%8A%E6%95%85%E9%9A%9C/</guid>
+      <description></description>
+    </item>
+    
+  </channel>
+</rss>

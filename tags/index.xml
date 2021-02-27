@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Tags on SKY</title>
+    <link>https://feeori.github.io/tags/</link>
+    <description>Recent content in Tags on SKY</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <lastBuildDate>Sat, 27 Feb 2021 10:51:16 +0800</lastBuildDate><atom:link href="https://feeori.github.io/tags/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>CDH</title>
+      <link>https://feeori.github.io/tags/cdh/</link>
+      <pubDate>Sat, 27 Feb 2021 10:51:16 +0800</pubDate>
+      
+      <guid>https://feeori.github.io/tags/cdh/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Hive</title>
+      <link>https://feeori.github.io/tags/hive/</link>
+      <pubDate>Sat, 27 Feb 2021 10:51:16 +0800</pubDate>
+      
+      <guid>https://feeori.github.io/tags/hive/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Mapreduce</title>
+      <link>https://feeori.github.io/tags/mapreduce/</link>
+      <pubDate>Sat, 27 Feb 2021 10:51:16 +0800</pubDate>
+      
+      <guid>https://feeori.github.io/tags/mapreduce/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>大数据</title>
+      <link>https://feeori.github.io/tags/%E5%A4%A7%E6%95%B0%E6%8D%AE/</link>
+      <pubDate>Sat, 27 Feb 2021 10:51:16 +0800</pubDate>
+      
+      <guid>https://feeori.github.io/tags/%E5%A4%A7%E6%95%B0%E6%8D%AE/</guid>
+      <description></description>
+    </item>
+    
+  </channel>
+</rss>

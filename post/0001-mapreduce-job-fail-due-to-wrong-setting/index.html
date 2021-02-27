@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>Mapreduce: 节点失效时，错误的配置导致Hive任务失败 - SKY</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="feeori" /><meta name="description" content="前言 副本（冗余）是分布式系统用来保障可靠性、可用性的基石特性。一切数据皆有副本，即使出现了单个节点失效的情况，由于有副本的存在，数据/任务的" /><meta name="keywords" content="Hugo, theme, even" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.81.0 with theme even" />
+
+
+<link rel="canonical" href="https://feeori.github.io/post/0001-mapreduce-job-fail-due-to-wrong-setting/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+<link href="/sass/main.min.b5a744db6de49a86cadafb3b70f555ab443f83c307a483402259e94726b045ff.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
+
+
+<meta property="og:title" content="Mapreduce: 节点失效时，错误的配置导致Hive任务失败" />
+<meta property="og:description" content="前言 副本（冗余）是分布式系统用来保障可靠性、可用性的基石特性。一切数据皆有副本，即使出现了单个节点失效的情况，由于有副本的存在，数据/任务的" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://feeori.github.io/post/0001-mapreduce-job-fail-due-to-wrong-setting/" /><meta property="article:section" content="post" />
+<meta property="article:published_time" content="2021-02-27T10:51:16&#43;08:00" />
+<meta property="article:modified_time" content="2021-02-27T10:51:16&#43;08:00" />
+
+<meta itemprop="name" content="Mapreduce: 节点失效时，错误的配置导致Hive任务失败">
+<meta itemprop="description" content="前言 副本（冗余）是分布式系统用来保障可靠性、可用性的基石特性。一切数据皆有副本，即使出现了单个节点失效的情况，由于有副本的存在，数据/任务的"><meta itemprop="datePublished" content="2021-02-27T10:51:16&#43;08:00" />
+<meta itemprop="dateModified" content="2021-02-27T10:51:16&#43;08:00" />
+<meta itemprop="wordCount" content="2044">
+<meta itemprop="keywords" content="Hive,CDH,Mapreduce,大数据," /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Mapreduce: 节点失效时，错误的配置导致Hive任务失败"/>
+<meta name="twitter:description" content="前言 副本（冗余）是分布式系统用来保障可靠性、可用性的基石特性。一切数据皆有副本，即使出现了单个节点失效的情况，由于有副本的存在，数据/任务的"/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">SKY</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="/">
+        <li class="mobile-menu-item">首页</li>
+      </a><a href="/post/">
+        <li class="mobile-menu-item">归档</li>
+      </a><a href="/tags/">
+        <li class="mobile-menu-item">标签</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">分类</li>
+      </a><a href="/about/">
+        <li class="mobile-menu-item">关于</li>
+      </a>
+  </ul>
+
+  
+
+
+</nav>
+
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">SKY</a>
+</div>
+
+
+
+
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="/">首页</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/post/">归档</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/tags/">标签</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">分类</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/about/">关于</a>
+      </li>
+  </ul>
+</nav>
+
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">Mapreduce: 节点失效时，错误的配置导致Hive任务失败</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2021-02-27 </span>
+        <div class="post-category">
+            <a href="/categories/%E7%BA%BF%E4%B8%8A%E6%95%85%E9%9A%9C/"> 线上故障 </a>
+            </div>
+          <span class="more-meta"> 约 2044 字 </span>
+          <span class="more-meta"> 预计阅读 5 分钟 </span>
+        
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">文章目录</h2>
+  <div class="post-toc-content always-active">
+    <nav id="TableOfContents">
+  <ul>
+    <li>
+      <ul>
+        <li><a href="#前言">前言</a></li>
+        <li><a href="#故障描述">故障描述</a></li>
+        <li><a href="#故障分析">故障分析</a>
+          <ul>
+            <li><a href="#job-history显示该job有两次重试但重试也失败了">job history显示该job有两次重试，但重试也失败了</a></li>
+            <li><a href="#hive-job日志显示找不到mapxml的block">Hive job日志显示找不到map.xml的block</a></li>
+          </ul>
+        </li>
+        <li><a href="#hdfs日志中发现mapxml对应的block副本数被设置为1">HDFS日志中，发现map.xml对应的block副本数被设置为1</a></li>
+        <li><a href="#非故障时间mapxml的副本数都会从3变为1">非故障时间，map.xml的副本数都会从3变为1</a></li>
+        <li><a href="#撸代码">撸代码</a></li>
+        <li><a href="#错误配置罪魁祸首">错误配置，罪魁祸首</a></li>
+        <li><a href="#结语">结语</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+  </div>
+</div>
+    <div class="post-content">
+      <h2 id="前言">前言</h2>
+<p>副本（冗余）是分布式系统用来保障可靠性、可用性的基石特性。一切数据皆有副本，即使出现了单个节点失效的情况，由于有副本的存在，数据/任务的理应继续保持可用。</p>
+<h2 id="故障描述">故障描述</h2>
+<p>某日，一个datanode挂机（下文datanode14），导致凌晨出数的部分Hive任务失败，注意是<code>部分失败</code>，大部分Hive任务还是成功的。但依然不合理，一个datanode失效，会导致Hive任务失败？重试机制呢？副本呢？这与认知不符啊？事出反常，魔鬼藏在细节里，只好深入研究研究了。</p>
+<h2 id="故障分析">故障分析</h2>
+<p>在Hive执行过程中，一个datanode挂机，会影响Hive任务，这个可以理解。但Hive不会<code>重试</code>？怎么不把任务调度到其他有副本的节点上执行？</p>
+<p>先去job history，看看发生甚么事了。</p>
+<h3 id="job-history显示该job有两次重试但重试也失败了">job history显示该job有两次重试，但重试也失败了</h3>
+<p>从下图可以看出，Map有33个任务，但Attempt了99次，均失败（1次正常执行+2次重试。重试的次数是可配的，见CDH YARN里的mapreduce.am.max-attempts，默认为2）。
+<img src="/img/0001-mapreduce-job-fail-due-to-wrong-setting/01-attempt-fail-in-job-history.png" alt="job history"></p>
+<p>看来Hive已经尽力重试过了，只是重试也失败了，重试为啥会失败呢？接着看看Hive任务具体的错误日志。</p>
+<h3 id="hive-job日志显示找不到mapxml的block">Hive job日志显示找不到map.xml的block</h3>
+<p>日志显示任务在执行过程中，由于找不到文件map.xml（文件对应的HDFS块为blk_1233120961_159438211），导致任务失败。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-fallback" data-lang="fallback">2019-03-13 02:12:23,935 INFO [main] org.apache.hadoop.hdfs.DFSClient: No node available for BP-1495231908-10.10.13.60-1497237252772:blk_1233120961_159438211 file=/tmp/hive/hdfs/4c366474-4d80-4646-abd8-e190ee10fce2/hive_2019-03-13_01-25-29_642_5360272907506781180-1/-mr-10082/3e2b0e34-257d-4249-ac52-97786b1a39e0/map.xml
+2019-03-13 02:12:23,935 INFO [main] org.apache.hadoop.hdfs.DFSClient: Could not obtain BP-1495231908-10.10.13.60-1497237252772:blk_1233120961_159438211 from any node: java.io.IOException: No live nodes contain block BP-1495231908-10.10.13.60-1497237252772:blk_1233120961_159438211 after checking nodes = [], ignoredNodes = null No live nodes contain current block Block locations: Dead nodes: . Will get new block locations from namenode and retry...
+2019-03-13 02:12:23,935 WARN [main] org.apache.hadoop.hdfs.DFSClient: DFS chooseDataNode: got # 1 IOException, will wait for 688.0608775666193 msec.
+2019-03-13 02:12:24,625 INFO [main] org.apache.hadoop.hdfs.DFSClient: No node available for BP-1495231908-10.10.13.60-1497237252772:blk_1233120961_159438211 file=/tmp/hive/hdfs/4c366474-4d80-4646-abd8-e190ee10fce2/hive_2019-03-13_01-25-29_642_5360272907506781180-1/-mr-10082/3e2b0e34-257d-4249-ac52-97786b1a39e0/map.xml
+2019-03-13 02:12:24,625 INFO [main] org.apache.hadoop.hdfs.DFSClient: Could not obtain BP-1495231908-10.10.13.60-1497237252772:blk_1233120961_159438211 from any node: java.io.IOException: No live nodes contain block BP-1495231908-10.10.13.60-1497237252772:blk_1233120961_159438211 after checking nodes = [], ignoredNodes = null No live nodes contain current block Block locations: Dead nodes: . Will get new block locations from namenode and retry...
+</code></pre></td></tr></table>
+</div>
+</div><p>居然出现了块丢失，不是有副本么？怎么会出现找不到的数据块？去HDFS日志里翻翻，希望能找到关于这个丢失块的日志。</p>
+<h2 id="hdfs日志中发现mapxml对应的block副本数被设置为1">HDFS日志中，发现map.xml对应的block副本数被设置为1</h2>
+<p>文件创建的时候，3e2b0e34-257d-4249-ac52-97786b1a39e0/map.xml在以下三个节点上，此时确实是3副本：10.10.15.75（挂掉的datanode14）, 10.10.15.63(datanode2)，10.10.15.66(datanode5)：
+<img src="/img/0001-mapreduce-job-fail-due-to-wrong-setting/02-map-xml-location.png" alt="map xml location"></p>
+<p>接着往下看，搜寻map.xml相关的日志，发现map.xml副本数被设置成了1
+<img src="/img/0001-mapreduce-job-fail-due-to-wrong-setting/03-xml-decrease-to-one-of-failure-job.png" alt="map xml replication decrease to one"></p>
+<p>紧接着其余两个datanode（10.10.15.63, 10.10.15.66）上的map.xml副本的block先是被namenode2设置为失效，然后被物理删除，导致仅剩10.10.15.75（挂掉的节点）上还有map.xml的数据：
+<img src="/img/0001-mapreduce-job-fail-due-to-wrong-setting/04-block-deleted-in-hdfs.png" alt="map xml deleted 1">
+<img src="/img/0001-mapreduce-job-fail-due-to-wrong-setting/05-block-deleted-in-hdfs-2.png" alt="map xml deleted 2"></p>
+<p>到目前为止，大概了解此次故障的过程了：Hive创建任务时，任务文件map.xml有3个副本，但后面副本数被降低到1。而唯一的副本，刚好在挂掉的datanode14上。。datanode14挂机后，唯一的副本丢失，导致这部分的Hive任务即使重试，最终也会失败。</p>
+<h2 id="非故障时间mapxml的副本数都会从3变为1">非故障时间，map.xml的副本数都会从3变为1</h2>
+<p>日志里继续搜寻，发现非故障时间段，MR任务的jar包，map.xml，reduce.xml的副本数，也会从3变为1。
+<img src="/img/0001-mapreduce-job-fail-due-to-wrong-setting/06-other-xml-decrease-to-one.png" alt="map xml replication decrease to one"></p>
+<p>发现大规模的、有规律的日志，因此开始认定，不是偶然或人为操作导致副本降为1，应该是哪里的配置出了问题。</p>
+<h2 id="撸代码">撸代码</h2>
+<p>查看代码，发现往远程拷贝MR任务相关的文件时，会执行setReplication，把副本数设置为mapreduce.client.submit.file.replication。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-Java" data-lang="Java"><span class="kd">public</span> <span class="kd">static</span> <span class="kd">final</span> <span class="n">String</span> <span class="n">SUBMIT_REPLICATION</span> <span class="o">=</span>
+  <span class="s">&#34;mapreduce.client.submit.file.replication&#34;</span><span class="o">;</span>                            <span class="o">======&gt;</span> <span class="n">mapreduce</span><span class="o">.</span><span class="na">client</span><span class="o">.</span><span class="na">submit</span><span class="o">.</span><span class="na">file</span><span class="o">.</span><span class="na">replication线上的值为1</span>
+ 
+ 
+<span class="kd">public</span> <span class="kt">void</span> <span class="nf">uploadFiles</span><span class="o">(</span><span class="n">Job</span> <span class="n">job</span><span class="o">,</span> <span class="n">Path</span> <span class="n">submitJobDir</span><span class="o">)</span> <span class="kd">throws</span> <span class="n">IOException</span> <span class="o">{</span>
+  <span class="n">Configuration</span> <span class="n">conf</span> <span class="o">=</span> <span class="n">job</span><span class="o">.</span><span class="na">getConfiguration</span><span class="o">();</span>
+  <span class="kt">short</span> <span class="n">replication</span> <span class="o">=</span>
+      <span class="o">(</span><span class="kt">short</span><span class="o">)</span> <span class="n">conf</span><span class="o">.</span><span class="na">getInt</span><span class="o">(</span><span class="n">Job</span><span class="o">.</span><span class="na">SUBMIT_REPLICATION</span><span class="o">,</span>                        <span class="o">======&gt;</span> <span class="n">设置replication的值为SUBMIT_REPLICATION</span>
+          <span class="n">Job</span><span class="o">.</span><span class="na">DEFAULT_SUBMIT_REPLICATION</span><span class="o">);</span>
+  <span class="o">...</span>
+  <span class="n">copyJar</span><span class="o">(</span><span class="n">jobJarPath</span><span class="o">,</span> <span class="n">JobSubmissionFiles</span><span class="o">.</span><span class="na">getJobJar</span><span class="o">(</span><span class="n">submitJobDir</span><span class="o">),</span>        <span class="o">======&gt;</span> <span class="n">往远程拷贝jar包</span><span class="err">，</span><span class="n">并设置副本数</span>
+    <span class="n">replication</span><span class="o">);</span>
+ 
+ 
+<span class="kd">private</span> <span class="kt">void</span> <span class="nf">copyJar</span><span class="o">(</span><span class="n">Path</span> <span class="n">originalJarPath</span><span class="o">,</span> <span class="n">Path</span> <span class="n">submitJarFile</span><span class="o">,</span>
+    <span class="kt">short</span> <span class="n">replication</span><span class="o">)</span> <span class="kd">throws</span> <span class="n">IOException</span> <span class="o">{</span>
+  <span class="n">jtFs</span><span class="o">.</span><span class="na">copyFromLocalFile</span><span class="o">(</span><span class="n">originalJarPath</span><span class="o">,</span> <span class="n">submitJarFile</span><span class="o">);</span>                <span class="o">======&gt;</span> <span class="n">往远程拷贝jar包</span><span class="o">/</span><span class="n">map</span><span class="o">.</span><span class="na">xml</span><span class="o">/</span><span class="n">reduce</span><span class="o">.</span><span class="na">xml等MR配置文件</span><span class="err">，</span><span class="n">HDFS的replication为3</span><span class="err">，</span><span class="n">因此一开始副本数为3</span>
+  <span class="n">jtFs</span><span class="o">.</span><span class="na">setReplication</span><span class="o">(</span><span class="n">submitJarFile</span><span class="o">,</span> <span class="n">replication</span><span class="o">);</span>                       <span class="o">======&gt;</span> <span class="n">此刻将副本数从3改到1</span>
+  <span class="n">jtFs</span><span class="o">.</span><span class="na">setPermission</span><span class="o">(</span><span class="n">submitJarFile</span><span class="o">,</span> <span class="k">new</span> <span class="n">FsPermission</span><span class="o">(</span>
+      <span class="n">JobSubmissionFiles</span><span class="o">.</span><span class="na">JOB_FILE_PERMISSION</span><span class="o">));</span>
+<span class="o">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="错误配置罪魁祸首">错误配置，罪魁祸首</h2>
+<p>查看线上YARN配置，发现<code>mapreduce.client.submit.file.replication</code>的值改为了1（默认是3）。。
+<img src="/img/0001-mapreduce-job-fail-due-to-wrong-setting/07-wrong-setting.png" alt="map xml replication decrease to one"></p>
+<p>到此，单个datanode挂机，导致Hive任务失败的问题定位清楚了，有人改动了MR任务文件的副本参数！重新将该参数增大，改为2或3之后，问题就解决了。</p>
+<h2 id="结语">结语</h2>
+<p>导致此次故障的参数比较生僻，很少有人会主动修改该参数（后来得知当初将该参数设置为1，是为了节省HDFS空间，减少Hive任务产生的临时文件）。</p>
+<p>大数据组件参数众多，改变参数前，需了解参数的细节，再进行改动。否则就出现了上面的问题，即使普通文件是3副本，但MR的任务文件是1副本，出现单个datanode故障时，任务仍然会失败。</p>
+
+    </div>
+
+    <div class="post-copyright">
+  <p class="copyright-item">
+    <span class="item-title">文章作者</span>
+    <span class="item-content">feeori</span>
+  </p>
+  <p class="copyright-item">
+    <span class="item-title">上次更新</span>
+    <span class="item-content">
+        2021-02-27
+        
+    </span>
+  </p>
+  
+  
+</div>
+<footer class="post-footer">
+      <div class="post-tags">
+          <a href="/tags/hive/">Hive</a>
+          <a href="/tags/cdh/">CDH</a>
+          <a href="/tags/mapreduce/">Mapreduce</a>
+          <a href="/tags/%E5%A4%A7%E6%95%B0%E6%8D%AE/">大数据</a>
+          </div>
+      <nav class="post-nav">
+        
+        
+      </nav>
+    </footer>
+  </article>
+        </div>
+        
+
+  
+
+  
+    <script src="https://utteranc.es/client.js"
+            repo="feeori/feeori.github.io"
+            issue-term="pathname"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://github.com/utterance">comments powered by utterances.</a></noscript>
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      
+
+<div class="copyright">
+  <span class="power-by">
+    由 <a class="hexo-link" href="https://gohugo.io">Hugo</a> 强力驱动
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    主题 - 
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
+
+  
+
+  <span class="copyright-year">
+    &copy; 
+    2017 - 
+    2021<span class="heart"><i class="iconfont icon-heart"></i></span><span>feeori</span>
+  </span>
+</div>
+
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
+
+
+
+<script type="text/javascript" src="/js/main.min.c99b103c33d1539acf3025e1913697534542c4a5aa5af0ccc20475ed2863603b.js"></script>
+
+
+
+
+
+
+
+
+</body>
+</html>

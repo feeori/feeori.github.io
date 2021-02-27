@@ -1,0 +1,2 @@
+User-agent: *
+Sitemap: https://feeori.github.io/sitemap.xml
