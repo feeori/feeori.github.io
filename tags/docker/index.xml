@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Docker on SKY</title>
+    <link>https://feeori.github.io/tags/docker/</link>
+    <description>Recent content in Docker on SKY</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <lastBuildDate>Sun, 28 Feb 2021 17:13:22 +0800</lastBuildDate><atom:link href="https://feeori.github.io/tags/docker/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>NFS: Docker挂载NFS，间歇报input/output error错</title>
+      <link>https://feeori.github.io/post/0002-nfs-input-output-error/</link>
+      <pubDate>Sun, 28 Feb 2021 17:13:22 +0800</pubDate>
+      
+      <guid>https://feeori.github.io/post/0002-nfs-input-output-error/</guid>
+      <description>前言 线上的服务发布在基于Swarm管理的docker里，并且挂载了NFS，来访问远端的数据。 故障描述 某日，几个docker，不规律地报inp</description>
+    </item>
+    
+  </channel>
+</rss>

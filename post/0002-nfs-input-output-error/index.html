@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>NFS: Docker挂载NFS，间歇报input/output error错 - SKY</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="feeori" /><meta name="description" content="前言 线上的服务发布在基于Swarm管理的docker里，并且挂载了NFS，来访问远端的数据。 故障描述 某日，几个docker，不规律地报inp" /><meta name="keywords" content="Hugo, theme, even" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.81.0 with theme even" />
+
+
+<link rel="canonical" href="https://feeori.github.io/post/0002-nfs-input-output-error/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+<link href="/sass/main.min.b5a744db6de49a86cadafb3b70f555ab443f83c307a483402259e94726b045ff.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
+
+
+<meta property="og:title" content="NFS: Docker挂载NFS，间歇报input/output error错" />
+<meta property="og:description" content="前言 线上的服务发布在基于Swarm管理的docker里，并且挂载了NFS，来访问远端的数据。 故障描述 某日，几个docker，不规律地报inp" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://feeori.github.io/post/0002-nfs-input-output-error/" /><meta property="article:section" content="post" />
+<meta property="article:published_time" content="2021-02-28T17:13:22&#43;08:00" />
+<meta property="article:modified_time" content="2021-02-28T17:13:22&#43;08:00" />
+
+<meta itemprop="name" content="NFS: Docker挂载NFS，间歇报input/output error错">
+<meta itemprop="description" content="前言 线上的服务发布在基于Swarm管理的docker里，并且挂载了NFS，来访问远端的数据。 故障描述 某日，几个docker，不规律地报inp"><meta itemprop="datePublished" content="2021-02-28T17:13:22&#43;08:00" />
+<meta itemprop="dateModified" content="2021-02-28T17:13:22&#43;08:00" />
+<meta itemprop="wordCount" content="3429">
+<meta itemprop="keywords" content="NFS,Docker," /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="NFS: Docker挂载NFS，间歇报input/output error错"/>
+<meta name="twitter:description" content="前言 线上的服务发布在基于Swarm管理的docker里，并且挂载了NFS，来访问远端的数据。 故障描述 某日，几个docker，不规律地报inp"/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">SKY</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="/">
+        <li class="mobile-menu-item">首页</li>
+      </a><a href="/post/">
+        <li class="mobile-menu-item">归档</li>
+      </a><a href="/tags/">
+        <li class="mobile-menu-item">标签</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">分类</li>
+      </a><a href="/about/">
+        <li class="mobile-menu-item">关于</li>
+      </a>
+  </ul>
+
+  
+
+
+</nav>
+
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">SKY</a>
+</div>
+
+
+
+
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="/">首页</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/post/">归档</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/tags/">标签</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">分类</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/about/">关于</a>
+      </li>
+  </ul>
+</nav>
+
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">NFS: Docker挂载NFS，间歇报input/output error错</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2021-02-28 </span>
+        <div class="post-category">
+            <a href="/categories/%E7%BA%BF%E4%B8%8A%E6%95%85%E9%9A%9C/"> 线上故障 </a>
+            </div>
+          <span class="more-meta"> 约 3429 字 </span>
+          <span class="more-meta"> 预计阅读 7 分钟 </span>
+        <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> 次阅读 </span>
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">文章目录</h2>
+  <div class="post-toc-content always-active">
+    <nav id="TableOfContents">
+  <ul>
+    <li>
+      <ul>
+        <li><a href="#前言">前言</a></li>
+        <li><a href="#故障描述">故障描述</a></li>
+        <li><a href="#故障分析">故障分析</a>
+          <ul>
+            <li><a href="#开启debug日志定位错误">开启debug日志，定位错误</a></li>
+            <li><a href="#nfs4err_expired与inputoutput-error">NFS4ERR_EXPIRED与input/output error</a></li>
+            <li><a href="#nfs4err_expired是哪里返回的">NFS4ERR_EXPIRED是哪里返回的</a></li>
+            <li><a href="#open为何会返回nfs4err_expired">Open为何会返回NFS4ERR_EXPIRED？</a></li>
+            <li><a href="#为何nfs-server里的客户端数据找不到了">为何NFS server里的客户端数据找不到了？</a></li>
+            <li><a href="#setclientid操作">SETCLIENTID操作</a></li>
+            <li><a href="#存在同名客户端">存在同名客户端</a></li>
+            <li><a href="#客户端名字生成流程">客户端名字生成流程</a></li>
+          </ul>
+        </li>
+        <li><a href="#解决方案">解决方案</a></li>
+        <li><a href="#结语">结语</a></li>
+        <li><a href="#ref">Ref</a>
+          <ul>
+            <li><a href="#类似问题">类似问题</a></li>
+            <li><a href="#nfs-debug">NFS debug</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+  </div>
+</div>
+    <div class="post-content">
+      <h2 id="前言">前言</h2>
+<p>线上的服务发布在基于Swarm管理的docker里，并且挂载了NFS，来访问远端的数据。</p>
+<h2 id="故障描述">故障描述</h2>
+<p>某日，几个docker，不规律地报input/output error错误。出现错误时，服务无法通过NFS进行正常的读取，导致线上服务报400或500错误。</p>
+<h2 id="故障分析">故障分析</h2>
+<p>NFS相对上层应用来说是黑盒子，先看看错误日志，日志是打开黑盒子的第一步。</p>
+<h3 id="开启debug日志定位错误">开启debug日志，定位错误</h3>
+<p>幸运的是，故障现场得到保留，打开debug日志之后，能够重现错误。访问test1.txt，出故障时，终端上显示input/output error，但日志里返回的是10011(NFS4ERR_EXPIRED)。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-shell" data-lang="shell"><span class="c1"># 开启nfs debug level的日志</span>
+$ rpcdebug -m nfs -s all
+$ cat /proc/sys/sunrpc/nfs_debug
+ 
+$ less /var/log/message
+Nov <span class="m">12</span> 18:31:40 docker27 kernel: NFS: atomic_open<span class="o">(</span>0:94/204203405579<span class="o">)</span>, test1.txt                               <span class="o">====</span>&gt; open test1.txt文件
+Nov <span class="m">12</span> 18:31:40 docker27 kernel: --&gt; nfs4_alloc_slot <span class="nv">used_slots</span><span class="o">=</span><span class="m">0000</span> <span class="nv">highest_used</span><span class="o">=</span><span class="m">4294967295</span> <span class="nv">max_slots</span><span class="o">=</span><span class="m">1024</span>
+Nov <span class="m">12</span> 18:31:40 docker27 kernel: &lt;-- nfs4_alloc_slot <span class="nv">used_slots</span><span class="o">=</span><span class="m">0001</span> <span class="nv">highest_used</span><span class="o">=</span><span class="m">0</span> <span class="nv">slotid</span><span class="o">=</span><span class="m">0</span>
+Nov <span class="m">12</span> 18:31:40 docker27 kernel: nfs4_free_slot: slotid <span class="m">0</span> highest_used_slotid <span class="m">4294967295</span>
+Nov <span class="m">12</span> 18:31:40 docker27 kernel: nfs4_map_errors could not handle NFSv4 error <span class="nv">10011</span>                           <span class="o">====</span>&gt; 出现10011<span class="o">(</span>NFS4ERR_EXPIRED<span class="o">)</span>错误
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="nfs4err_expired与inputoutput-error">NFS4ERR_EXPIRED与input/output error</h3>
+<p>根据日志里的错误信息<code>nfs4_map_errors could not handle NFSv4 error 10011</code>，找到Linux kernel nfs代码，发现NFS会将无法处理的错误（NFS4ERR_EXPIRED），转换成EIO（即input/output error）。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-c" data-lang="c"><span class="cm">/* Prevent leaks of NFSv4 errors into userland */</span>
+<span class="k">static</span> <span class="kt">int</span> <span class="nf">nfs4_map_errors</span><span class="p">(</span><span class="kt">int</span> <span class="n">err</span><span class="p">)</span>
+<span class="p">{</span>
+	<span class="k">if</span> <span class="p">(</span><span class="n">err</span> <span class="o">&gt;=</span> <span class="o">-</span><span class="mi">1000</span><span class="p">)</span>
+		<span class="k">return</span> <span class="n">err</span><span class="p">;</span>
+	<span class="k">switch</span> <span class="p">(</span><span class="n">err</span><span class="p">)</span> <span class="p">{</span>
+    <span class="p">......</span>
+	<span class="k">case</span> <span class="o">-</span><span class="nl">NFS4ERR_FILE_OPEN</span><span class="p">:</span>
+		<span class="k">return</span> <span class="o">-</span><span class="n">EBUSY</span><span class="p">;</span>
+	<span class="k">case</span> <span class="o">-</span><span class="nl">NFS4ERR_NOT_SAME</span><span class="p">:</span>
+		<span class="k">return</span> <span class="o">-</span><span class="n">ENOTSYNC</span><span class="p">;</span>
+	<span class="k">default</span><span class="o">:</span>
+		<span class="n">dprintk</span><span class="p">(</span><span class="s">&#34;%s could not handle NFSv4 error %d</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span>  <span class="o">====&gt;</span> <span class="err">即日志里的</span><span class="n">nfs4_map_errors</span> <span class="n">could</span> <span class="n">not</span> <span class="n">handle</span> <span class="n">NFSv4</span> <span class="n">error</span> <span class="mi">10011</span>
+				<span class="n">__func__</span><span class="p">,</span> <span class="o">-</span><span class="n">err</span><span class="p">);</span>
+		<span class="k">break</span><span class="p">;</span>
+	<span class="p">}</span>
+	<span class="k">return</span> <span class="o">-</span><span class="n">EIO</span><span class="p">;</span>                                         <span class="o">====&gt;</span> <span class="err">无法处理的错误，转换为</span><span class="n">EIO</span><span class="err">，在终端上显示</span><span class="n">input</span><span class="o">/</span><span class="n">output</span> <span class="n">error</span>
+<span class="p">}</span>
+
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="nfs4err_expired是哪里返回的">NFS4ERR_EXPIRED是哪里返回的</h3>
+<p>进一步需要知道，NFS4ERR_EXPIRED到底是客户端产生的，还是服务端返回的？抓个包，看一眼。
+<img src="/img/0002-nfs-input-output-error/01-hit-nfs4err-expired-error.png" alt="nfs4err_expired tcpdump"></p>
+<p>发现是服务端返回的(NFS server是10.10.14.77，NFS client是10.10.14.236)。从图中还可以得知，是Open操作返回的。</p>
+<h3 id="open为何会返回nfs4err_expired">Open为何会返回NFS4ERR_EXPIRED？</h3>
+<p>扫了一眼Open相关的代码，发现Open的调用链的lookup_clientid函数，会返回NFS4ERR_EXPIRED。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-c" data-lang="c"><span class="c1">// 根据Open调用链，OP_OPEN-&gt;nfsd4_open-&gt;nfsd4_process_open1-&gt;lookup_clientid
+</span><span class="c1"></span> 
+<span class="n">lookup_clientid</span><span class="p">(...)</span>
+<span class="p">{</span>
+    <span class="p">......</span>
+    <span class="n">found</span> <span class="o">=</span> <span class="n">find_confirmed_client</span><span class="p">(</span><span class="n">clid</span><span class="p">,</span> <span class="nb">false</span><span class="p">,</span> <span class="n">nn</span><span class="p">);</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">found</span><span class="p">)</span> <span class="p">{</span>                             <span class="o">====&gt;</span> <span class="err">根据</span><span class="n">clid查找客户端的数据结构</span><span class="err">，未找到，则返回</span><span class="n">NFS4ERR_EXPIRED</span>
+        <span class="n">spin_unlock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">nn</span><span class="o">-&gt;</span><span class="n">client_lock</span><span class="p">);</span>
+        <span class="k">return</span> <span class="n">nfserr_expired</span><span class="p">;</span>                <span class="o">====&gt;</span> <span class="err">此处返回</span><span class="n">NFSERR_EXPIRED</span><span class="err">，</span><span class="n">NFSERR_EXPIRED</span> <span class="o">==</span> <span class="n">NFS4ERR_EXPIRED</span> <span class="o">==</span> <span class="mi">10011</span>
+    <span class="p">}</span>
+    <span class="p">......</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>根据代码可知，使用客户端id进行查询的时候，找不到了对应的内容了，会返回NFSERR_EXPIRED。客户端的信息应该是初始化阶段就注册好的，为啥会突然找不到呢？</p>
+<h3 id="为何nfs-server里的客户端数据找不到了">为何NFS server里的客户端数据找不到了？</h3>
+<p>Google了一下，发现有人碰到类似的错误：当出现两个同名的客户端访问NFS时，会出现NFS4ERR_EXPIRED错误，见<a href="https://serverfault.com/questions/851334/what-is-causing-input-output-errors-when-reading-from-nfs-v4-on-centos">serverfault</a>以及
+<a href="https://access.redhat.com/solutions/3753211">redhat knowledgebase</a>。</p>
+<h3 id="setclientid操作">SETCLIENTID操作</h3>
+<p>与此同时，抓包的过程中，发现SETCLIENTID操作很可疑（看名字像是Client id相关的写操作，而且每次该函数调用完，紧接着会出现NFSERR_EXPIRED）。
+<img src="/img/0002-nfs-input-output-error/02-setclientid.png" alt="setclientid tcpdump"></p>
+<p>这个SETCLIENTID操作，到底做了啥？再翻翻源码。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-c" data-lang="c"><span class="n">OP_SETCLIENTID</span><span class="o">-&gt;</span><span class="n">nfsd4_setclientid</span>
+ 
+<span class="n">nfsd4_setclientid</span><span class="p">(...)</span>
+<span class="p">{</span>
+    <span class="p">......</span>
+    <span class="n">unconf</span> <span class="o">=</span> <span class="n">find_unconfirmed_client_by_name</span><span class="p">(</span><span class="o">&amp;</span><span class="n">clname</span><span class="p">,</span> <span class="n">nn</span><span class="p">);</span>    <span class="o">====&gt;</span> <span class="err">根据</span><span class="n">clname</span><span class="p">(</span><span class="err">客户端名字</span><span class="p">)</span><span class="err">查找</span><span class="n">_同名的_客户端的数据结构</span>
+    <span class="p">......</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">unconf</span><span class="p">)</span>
+        <span class="n">expire_client</span><span class="p">(</span><span class="n">unconf</span><span class="p">);</span>                                <span class="o">====&gt;</span> <span class="err">找到之后，开始删除</span><span class="n">NFS</span> <span class="n">server上_同名的_客户端数据结构</span>
+    <span class="p">......</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>啊，看到上面<code>主动删除客户端数据</code>的代码，离解开谜题不远了。经过SETCLIENTID操作，删除同名的客户端之后，再次open的时候就会碰到，找不到客户端数据结构的问题。</p>
+<p>那是否存在同名的客户端呢？</p>
+<h3 id="存在同名客户端">存在同名客户端</h3>
+<p>继续抓包分析，发现10.10.14.235的clname叫&quot;Linux NFSv4.0 0-xxxxxx-job.app.local/10.10.14.77&quot;
+<img src="/img/0002-nfs-input-output-error/03-same-clname-1.png" alt="nfs4err_expired tcpdump">
+而10.10.14.236的clname也叫&quot;Linux NFSv4.0 0-xxxxxx-job.app.local/10.10.14.77&quot;
+<img src="/img/0002-nfs-input-output-error/04-same-clname-2.png" alt="nfs4err_expired tcpdump"></p>
+<p>同一个docker集群里<code>真的存在同名客户端 -。-</code>！客户端是如何命名的呢？</p>
+<h3 id="客户端名字生成流程">客户端名字生成流程</h3>
+<p>看看SETCLIENTID操作里clname是如何构造的。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-c" data-lang="c"><span class="cp"># 根据客户端encode代码，和上图id-&gt;contents所处的位置可知，cl_owner_id即为se_name
+</span><span class="cp"></span> 
+<span class="k">static</span> <span class="kt">void</span> <span class="nf">encode_setclientid</span><span class="p">(</span><span class="k">struct</span> <span class="n">xdr_stream</span> <span class="o">*</span><span class="n">xdr</span><span class="p">,</span> <span class="k">const</span> <span class="k">struct</span> <span class="n">nfs4_setclientid</span> <span class="o">*</span><span class="n">setclientid</span><span class="p">,</span> <span class="k">struct</span> <span class="n">compound_hdr</span> <span class="o">*</span><span class="n">hdr</span><span class="p">)</span>
+<span class="p">{</span>
+   <span class="n">__be32</span> <span class="o">*</span><span class="n">p</span><span class="p">;</span>
+   <span class="n">encode_op_hdr</span><span class="p">(</span><span class="n">xdr</span><span class="p">,</span> <span class="n">OP_SETCLIENTID</span><span class="p">,</span> <span class="n">decode_setclientid_maxsz</span><span class="p">,</span> <span class="n">hdr</span><span class="p">);</span>
+   <span class="n">encode_nfs4_verifier</span><span class="p">(</span><span class="n">xdr</span><span class="p">,</span> <span class="n">setclientid</span><span class="o">-&gt;</span><span class="n">sc_verifier</span><span class="p">);</span>                       <span class="o">===&gt;</span> <span class="n">verifier</span>
+   <span class="n">encode_string</span><span class="p">(</span><span class="n">xdr</span><span class="p">,</span> <span class="n">strlen</span><span class="p">(</span><span class="n">setclientid</span><span class="o">-&gt;</span><span class="n">sc_clnt</span><span class="o">-&gt;</span><span class="n">cl_owner_id</span><span class="p">),</span>
+           <span class="n">setclientid</span><span class="o">-&gt;</span><span class="n">sc_clnt</span><span class="o">-&gt;</span><span class="n">cl_owner_id</span><span class="p">);</span>                                <span class="o">===&gt;</span> <span class="n">NFS客户端的cl_owner_id</span><span class="err">，即为</span><span class="n">NFS服务端的se_name</span>
+   <span class="n">p</span> <span class="o">=</span> <span class="n">reserve_space</span><span class="p">(</span><span class="n">xdr</span><span class="p">,</span> <span class="mi">4</span><span class="p">);</span>
+   <span class="o">*</span><span class="n">p</span> <span class="o">=</span> <span class="n">cpu_to_be32</span><span class="p">(</span><span class="n">setclientid</span><span class="o">-&gt;</span><span class="n">sc_prog</span><span class="p">);</span>                                    <span class="o">===&gt;</span> <span class="n">callback</span> <span class="n">cb_program</span>
+   <span class="n">encode_string</span><span class="p">(</span><span class="n">xdr</span><span class="p">,</span> <span class="n">setclientid</span><span class="o">-&gt;</span><span class="n">sc_netid_len</span><span class="p">,</span> <span class="n">setclientid</span><span class="o">-&gt;</span><span class="n">sc_netid</span><span class="p">);</span>
+   <span class="n">encode_string</span><span class="p">(</span><span class="n">xdr</span><span class="p">,</span> <span class="n">setclientid</span><span class="o">-&gt;</span><span class="n">sc_uaddr_len</span><span class="p">,</span> <span class="n">setclientid</span><span class="o">-&gt;</span><span class="n">sc_uaddr</span><span class="p">);</span>
+   <span class="n">p</span> <span class="o">=</span> <span class="n">reserve_space</span><span class="p">(</span><span class="n">xdr</span><span class="p">,</span> <span class="mi">4</span><span class="p">);</span>
+   <span class="o">*</span><span class="n">p</span> <span class="o">=</span> <span class="n">cpu_to_be32</span><span class="p">(</span><span class="n">setclientid</span><span class="o">-&gt;</span><span class="n">sc_clnt</span><span class="o">-&gt;</span><span class="n">cl_cb_ident</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>也就是说其实是cl_owner_id重名了，那cl_owner_id又是如何构造的呢？</p>
+<p>cl_owner_id可能在如下三个函数中被设置，但不同版本的内核版本，设置的内容略有不同。总结来说：</p>
+<ul>
+<li>小于等于4.4.108的kernel中，cl_owner_id由NFS客户端的IP构成；</li>
+<li>4.19.12 kernel中，cl_owner_id由NFS客户端的hostname构成（当服务实例从一个物理机迁移到另外一个物理机上之后，若实例的hostname保持不变，导致重名）；</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-c" data-lang="c"><span class="c1">// 小于等于4.4.108
+</span><span class="c1">// 常规mount，未设置-o migration参数
+</span><span class="c1"></span><span class="n">nfs4_init_nonuniform_client_string</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">scnprintf</span><span class="p">(</span><span class="n">str</span><span class="p">,</span> <span class="n">len</span><span class="p">,</span> <span class="s">&#34;Linux NFSv4.0 %s/%s %s&#34;</span><span class="p">,</span>
+            <span class="n">clp</span><span class="o">-&gt;</span><span class="n">cl_ipaddr</span><span class="p">,</span>                                            <span class="o">====&gt;</span> <span class="err">客户端</span><span class="n">ip</span>
+            <span class="n">rpc_peeraddr2str</span><span class="p">(</span><span class="n">clp</span><span class="o">-&gt;</span><span class="n">cl_rpcclient</span><span class="p">,</span> <span class="n">RPC_DISPLAY_ADDR</span><span class="p">),</span>
+            <span class="n">rpc_peeraddr2str</span><span class="p">(</span><span class="n">clp</span><span class="o">-&gt;</span><span class="n">cl_rpcclient</span><span class="p">,</span> <span class="n">RPC_DISPLAY_PROTO</span><span class="p">));</span>
+ 
+<span class="c1">// 设置了migration，-o migration参数
+</span><span class="c1"></span><span class="n">nfs4_init_uniform_client_string</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">scnprintf</span><span class="p">(</span><span class="n">str</span><span class="p">,</span> <span class="n">len</span><span class="p">,</span> <span class="s">&#34;Linux NFSv%u.%u %s&#34;</span><span class="p">,</span>
+            <span class="n">clp</span><span class="o">-&gt;</span><span class="n">rpc_ops</span><span class="o">-&gt;</span><span class="n">version</span><span class="p">,</span> <span class="n">clp</span><span class="o">-&gt;</span><span class="n">cl_minorversion</span><span class="p">,</span>
+            <span class="n">clp</span><span class="o">-&gt;</span><span class="n">cl_rpcclient</span><span class="o">-&gt;</span><span class="n">cl_nodename</span><span class="p">);</span>
+ 
+<span class="c1">// 设置了migration，-o migration参数，且设置了nfs4_unique_id参数
+</span><span class="c1"></span><span class="n">nfs4_init_uniquifier_client_string</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">scnprintf</span><span class="p">(</span><span class="n">str</span><span class="p">,</span> <span class="n">len</span><span class="p">,</span> <span class="s">&#34;Linux NFSv%u.%u %s/%s&#34;</span><span class="p">,</span>
+            <span class="n">clp</span><span class="o">-&gt;</span><span class="n">rpc_ops</span><span class="o">-&gt;</span><span class="n">version</span><span class="p">,</span> <span class="n">clp</span><span class="o">-&gt;</span><span class="n">cl_minorversion</span><span class="p">,</span>
+            <span class="n">nfs4_client_id_uniquifier</span><span class="p">,</span>
+            <span class="n">clp</span><span class="o">-&gt;</span><span class="n">cl_rpcclient</span><span class="o">-&gt;</span><span class="n">cl_nodename</span><span class="p">);</span>
+			
+			
+<span class="c1">// 4.19.12
+</span><span class="c1">// 常规mount，未设置-o migration参数
+</span><span class="c1"></span><span class="n">nfs4_init_nonuniform_client_string</span>
+    <span class="cp"># 设置了nfs4_unique_id参数
+</span><span class="cp"></span>    <span class="k">if</span> <span class="p">(</span><span class="n">nfs4_client_id_uniquifier</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="sc">&#39;\0&#39;</span><span class="p">)</span>
+        <span class="n">scnprintf</span><span class="p">(</span><span class="n">str</span><span class="p">,</span> <span class="n">len</span><span class="p">,</span> <span class="s">&#34;Linux NFSv4.0 %s/%s/%s&#34;</span><span class="p">,</span>
+              <span class="n">clp</span><span class="o">-&gt;</span><span class="n">cl_rpcclient</span><span class="o">-&gt;</span><span class="n">cl_nodename</span><span class="p">,</span>                <span class="o">====&gt;</span> <span class="err">客户端</span><span class="n">hostname</span>
+              <span class="n">nfs4_client_id_uniquifier</span><span class="p">,</span>
+              <span class="n">rpc_peeraddr2str</span><span class="p">(</span><span class="n">clp</span><span class="o">-&gt;</span><span class="n">cl_rpcclient</span><span class="p">,</span>
+                       <span class="n">RPC_DISPLAY_ADDR</span><span class="p">));</span>
+    <span class="k">else</span>
+        <span class="nf">scnprintf</span><span class="p">(</span><span class="n">str</span><span class="p">,</span> <span class="n">len</span><span class="p">,</span> <span class="s">&#34;Linux NFSv4.0 %s/%s&#34;</span><span class="p">,</span>
+              <span class="n">clp</span><span class="o">-&gt;</span><span class="n">cl_rpcclient</span><span class="o">-&gt;</span><span class="n">cl_nodename</span><span class="p">,</span>
+              <span class="n">rpc_peeraddr2str</span><span class="p">(</span><span class="n">clp</span><span class="o">-&gt;</span><span class="n">cl_rpcclient</span><span class="p">,</span>
+                       <span class="n">RPC_DISPLAY_ADDR</span><span class="p">));</span>
+ 
+<span class="c1">// 设置了migration，-o migration参数
+</span><span class="c1"></span><span class="n">nfs4_init_uniform_client_string</span>
+    <span class="nf">scnprintf</span><span class="p">(</span><span class="n">str</span><span class="p">,</span> <span class="n">len</span><span class="p">,</span> <span class="s">&#34;Linux NFSv%u.%u %s&#34;</span><span class="p">,</span>
+            <span class="n">clp</span><span class="o">-&gt;</span><span class="n">rpc_ops</span><span class="o">-&gt;</span><span class="n">version</span><span class="p">,</span> <span class="n">clp</span><span class="o">-&gt;</span><span class="n">cl_minorversion</span><span class="p">,</span>
+            <span class="n">clp</span><span class="o">-&gt;</span><span class="n">cl_rpcclient</span><span class="o">-&gt;</span><span class="n">cl_nodename</span><span class="p">);</span>
+ 
+<span class="c1">// 设置了migration，-o migration参数，且设置了nfs4_unique_id参数
+</span><span class="c1"></span><span class="n">nfs4_init_uniquifier_client_string</span>
+    <span class="nf">scnprintf</span><span class="p">(</span><span class="n">str</span><span class="p">,</span> <span class="n">len</span><span class="p">,</span> <span class="s">&#34;Linux NFSv%u.%u %s/%s&#34;</span><span class="p">,</span>
+            <span class="n">clp</span><span class="o">-&gt;</span><span class="n">rpc_ops</span><span class="o">-&gt;</span><span class="n">version</span><span class="p">,</span> <span class="n">clp</span><span class="o">-&gt;</span><span class="n">cl_minorversion</span><span class="p">,</span>
+            <span class="n">nfs4_client_id_uniquifier</span><span class="p">,</span>
+            <span class="n">clp</span><span class="o">-&gt;</span><span class="n">cl_rpcclient</span><span class="o">-&gt;</span><span class="n">cl_nodename</span><span class="p">);</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>简而言之，如果想要每个客户端的名字全局唯一，需要提前设定nfs4_unique_id的值。<code>通过设置全局唯一的nfs4_unique_id的值</code>，才能保证不同NFS客户端拥有不同的名字。</p>
+<h2 id="解决方案">解决方案</h2>
+<p>由于不同内核版本，NFS客户端的名字构成不同，需使用不同的方式来处理。生产环境中，内核版本只有两种：4.4.108与4.19.12，分别使用如下策略来处理：</p>
+<ol>
+<li>4.4.108。4.4.108的NFS客户端的名字由客户端IP构成，而IP全局唯一，因此4.4.108上，NFS客户端的名字同样唯一，理论上不会出现不同节点有同名客户端的问题。对于4.4.108无需进行修复。</li>
+<li>4.19.12。4.19.12使用hostname作为NFS客户端名字，hostname很容易重名，想要保证名字全局唯一，需要额外设置nfs4_unique_id，通过nfs4_unique_id来保证NFS客户端名字完全唯一，设置方式如下：</li>
+</ol>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-fallback" data-lang="fallback">1，在宿主机上，设置nfs4_unique_id为uuid（不是一定要uuid，此处设置一个全局唯一的id也可）
+$ cat /sys/module/nfs/parameters/nfs4_unique_id
+$ echo `cat /proc/sys/kernel/random/uuid` &gt; /sys/module/nfs/parameters/nfs4_unique_id
+2，umount所有Docker里挂载，重新mount即可
+3，抓包检测一下nfs客户端的名字是否带上了nfs4_unique_id
+4，若宿主机nfs4_unique_id已被设置，需要清零，可使用如下命令
+$ echo -e &#39;\0&#39; &gt; /sys/module/nfs/parameters/nfs4_unique_id
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="结语">结语</h2>
+<p>总结一下故障过程：</p>
+<ol>
+<li>两个客户端使用相同的名字访问NFS server；</li>
+<li>互相刷lease，导致对方lease失效；</li>
+<li>引发open文件时返回NFS4ERR_EXPIRED错误；</li>
+<li>NFS4ERR_EXPIRED错误，NFS客户端无法处理，转换为Input/Output error，因此用户感受到的是Input/Output error错误。</li>
+</ol>
+<p>Swarm docker+NFS的方案，比较少见。因此国内少有人碰到以上的问题。由于Swarm的docker与主机共享hostname/ip，当与基于内核的NFS结合使用时，碰到了意向不到的问题，基础组件，还是要使用被广泛验证的方案，如K8s（docker有独立ip，隔离性更好），减少遇见奇怪坑的几率。</p>
+<h2 id="ref">Ref</h2>
+<h3 id="类似问题">类似问题</h3>
+<ul>
+<li><a href="https://access.redhat.com/solutions/3753211">https://access.redhat.com/solutions/3753211</a></li>
+<li><a href="https://access.redhat.com/solutions/3457671">https://access.redhat.com/solutions/3457671</a></li>
+<li><a href="https://access.redhat.com/solutions/3753211">https://access.redhat.com/solutions/3753211</a></li>
+<li><a href="https://access.redhat.com/solutions/3661921">https://access.redhat.com/solutions/3661921</a></li>
+</ul>
+<h3 id="nfs-debug">NFS debug</h3>
+<ul>
+<li><a href="https://www.thegeekdiary.com/how-to-enable-nfs-debug-logging-using-rpcdebug/">https://www.thegeekdiary.com/how-to-enable-nfs-debug-logging-using-rpcdebug/</a></li>
+<li><a href="https://wiki.archlinux.org/index.php/NFS/Troubleshooting_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)#NFS_debug_flags">https://wiki.archlinux.org/index.php/NFS/Troubleshooting_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)#NFS_debug_flags</a></li>
+</ul>
+
+    </div>
+
+    <div class="post-copyright">
+  <p class="copyright-item">
+    <span class="item-title">文章作者</span>
+    <span class="item-content">feeori</span>
+  </p>
+  <p class="copyright-item">
+    <span class="item-title">上次更新</span>
+    <span class="item-content">
+        2021-02-28
+        
+    </span>
+  </p>
+  
+  
+</div>
+<footer class="post-footer">
+      <div class="post-tags">
+          <a href="/tags/nfs/">NFS</a>
+          <a href="/tags/docker/">Docker</a>
+          </div>
+      <nav class="post-nav">
+        
+        <a class="next" href="/post/0001-mapreduce-job-fail-due-to-wrong-setting/">
+            <span class="next-text nav-default">Mapreduce: 节点失效时，错误的配置导致Hive任务失败</span>
+            <span class="next-text nav-mobile">下一篇</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        
+
+  
+
+  
+    <script src="https://utteranc.es/client.js"
+            repo="feeori/feeori.github.io"
+            issue-term="pathname"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://github.com/utterance">comments powered by utterances.</a></noscript>
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      
+
+<div class="copyright">
+  <span class="power-by">
+    由 <a class="hexo-link" href="https://gohugo.io">Hugo</a> 强力驱动
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    主题 - 
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
+
+  <div class="busuanzi-footer">
+    <span id="busuanzi_container_site_pv"> 本站总访问量 <span id="busuanzi_value_site_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> 次 </span>
+      <span class="division">|</span>
+    <span id="busuanzi_container_site_uv"> 本站总访客数 <span id="busuanzi_value_site_uv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> 人 </span>
+  </div>
+
+  <span class="copyright-year">
+    &copy; 
+    2017 - 
+    2021<span class="heart"><i class="iconfont icon-heart"></i></span><span>feeori</span>
+  </span>
+</div>
+
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
+
+
+
+<script type="text/javascript" src="/js/main.min.c99b103c33d1539acf3025e1913697534542c4a5aa5af0ccc20475ed2863603b.js"></script>
+
+
+
+
+
+
+
+
+</body>
+</html>
