@@ -33,7 +33,7 @@
 <link rel="manifest" href="/manifest.json">
 <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
 
-
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
 
 <link href="/sass/main.min.b5a744db6de49a86cadafb3b70f555ab443f83c307a483402259e94726b045ff.css" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
@@ -138,7 +138,7 @@
             </div>
           <span class="more-meta"> 约 2044 字 </span>
           <span class="more-meta"> 预计阅读 5 分钟 </span>
-        
+        <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> 次阅读 </span>
       </div>
     </header>
 
@@ -155,12 +155,12 @@
           <ul>
             <li><a href="#job-history显示该job有两次重试但重试也失败了">job history显示该job有两次重试，但重试也失败了</a></li>
             <li><a href="#hive-job日志显示找不到mapxml的block">Hive job日志显示找不到map.xml的block</a></li>
+            <li><a href="#hdfs日志中发现mapxml对应的block副本数被设置为1">HDFS日志中，发现map.xml对应的block副本数被设置为1</a></li>
+            <li><a href="#非故障时间mapxml的副本数都会从3变为1">非故障时间，map.xml的副本数都会从3变为1</a></li>
+            <li><a href="#撸代码">撸代码</a></li>
+            <li><a href="#错误配置罪魁祸首">错误配置，罪魁祸首</a></li>
           </ul>
         </li>
-        <li><a href="#hdfs日志中发现mapxml对应的block副本数被设置为1">HDFS日志中，发现map.xml对应的block副本数被设置为1</a></li>
-        <li><a href="#非故障时间mapxml的副本数都会从3变为1">非故障时间，map.xml的副本数都会从3变为1</a></li>
-        <li><a href="#撸代码">撸代码</a></li>
-        <li><a href="#错误配置罪魁祸首">错误配置，罪魁祸首</a></li>
         <li><a href="#结语">结语</a></li>
       </ul>
     </li>
@@ -199,7 +199,7 @@
 </code></pre></td></tr></table>
 </div>
 </div><p>居然出现了块丢失，不是有副本么？怎么会出现找不到的数据块？去HDFS日志里翻翻，希望能找到关于这个丢失块的日志。</p>
-<h2 id="hdfs日志中发现mapxml对应的block副本数被设置为1">HDFS日志中，发现map.xml对应的block副本数被设置为1</h2>
+<h3 id="hdfs日志中发现mapxml对应的block副本数被设置为1">HDFS日志中，发现map.xml对应的block副本数被设置为1</h3>
 <p>文件创建的时候，3e2b0e34-257d-4249-ac52-97786b1a39e0/map.xml在以下三个节点上，此时确实是3副本：10.10.15.75（挂掉的datanode14）, 10.10.15.63(datanode2)，10.10.15.66(datanode5)：
 <img src="/img/0001-mapreduce-job-fail-due-to-wrong-setting/02-map-xml-location.png" alt="map xml location"></p>
 <p>接着往下看，搜寻map.xml相关的日志，发现map.xml副本数被设置成了1
@@ -208,11 +208,11 @@
 <img src="/img/0001-mapreduce-job-fail-due-to-wrong-setting/04-block-deleted-in-hdfs.png" alt="map xml deleted 1">
 <img src="/img/0001-mapreduce-job-fail-due-to-wrong-setting/05-block-deleted-in-hdfs-2.png" alt="map xml deleted 2"></p>
 <p>到目前为止，大概了解此次故障的过程了：Hive创建任务时，任务文件map.xml有3个副本，但后面副本数被降低到1。而唯一的副本，刚好在挂掉的datanode14上。。datanode14挂机后，唯一的副本丢失，导致这部分的Hive任务即使重试，最终也会失败。</p>
-<h2 id="非故障时间mapxml的副本数都会从3变为1">非故障时间，map.xml的副本数都会从3变为1</h2>
+<h3 id="非故障时间mapxml的副本数都会从3变为1">非故障时间，map.xml的副本数都会从3变为1</h3>
 <p>日志里继续搜寻，发现非故障时间段，MR任务的jar包，map.xml，reduce.xml的副本数，也会从3变为1。
 <img src="/img/0001-mapreduce-job-fail-due-to-wrong-setting/06-other-xml-decrease-to-one.png" alt="map xml replication decrease to one"></p>
 <p>发现大规模的、有规律的日志，因此开始认定，不是偶然或人为操作导致副本降为1，应该是哪里的配置出了问题。</p>
-<h2 id="撸代码">撸代码</h2>
+<h3 id="撸代码">撸代码</h3>
 <p>查看代码，发现往远程拷贝MR任务相关的文件时，会执行setReplication，把副本数设置为mapreduce.client.submit.file.replication。</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
@@ -262,7 +262,7 @@
 <span class="o">}</span>
 </code></pre></td></tr></table>
 </div>
-</div><h2 id="错误配置罪魁祸首">错误配置，罪魁祸首</h2>
+</div><h3 id="错误配置罪魁祸首">错误配置，罪魁祸首</h3>
 <p>查看线上YARN配置，发现<code>mapreduce.client.submit.file.replication</code>的值改为了1（默认是3）。。
 <img src="/img/0001-mapreduce-job-fail-due-to-wrong-setting/07-wrong-setting.png" alt="map xml replication decrease to one"></p>
 <p>到此，单个datanode挂机，导致Hive任务失败的问题定位清楚了，有人改动了MR任务文件的副本参数！重新将该参数增大，改为2或3之后，问题就解决了。</p>
@@ -295,7 +295,11 @@
           <a href="/tags/%E5%A4%A7%E6%95%B0%E6%8D%AE/">大数据</a>
           </div>
       <nav class="post-nav">
-        
+        <a class="prev" href="/post/0002-nfs-input-output-error/">
+            <i class="iconfont icon-left"></i>
+            <span class="prev-text nav-default">NFS: Docker挂载NFS，间歇报input/output error错</span>
+            <span class="prev-text nav-mobile">上一篇</span>
+          </a>
         
       </nav>
     </footer>
@@ -331,7 +335,11 @@
     <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
   </span>
 
-  
+  <div class="busuanzi-footer">
+    <span id="busuanzi_container_site_pv"> 本站总访问量 <span id="busuanzi_value_site_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> 次 </span>
+      <span class="division">|</span>
+    <span id="busuanzi_container_site_uv"> 本站总访客数 <span id="busuanzi_value_site_uv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> 人 </span>
+  </div>
 
   <span class="copyright-year">
     &copy; 
