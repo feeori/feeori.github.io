@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>线上运维 on SKY</title>
+    <link>https://feeori.github.io/categories/%E7%BA%BF%E4%B8%8A%E8%BF%90%E7%BB%B4/</link>
+    <description>Recent content in 线上运维 on SKY</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <lastBuildDate>Sat, 20 Mar 2021 20:22:49 +0800</lastBuildDate><atom:link href="https://feeori.github.io/categories/%E7%BA%BF%E4%B8%8A%E8%BF%90%E7%BB%B4/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Redis：两则线上运维经验</title>
+      <link>https://feeori.github.io/post/0003-redis-2-devops-case/</link>
+      <pubDate>Sat, 20 Mar 2021 20:22:49 +0800</pubDate>
+      
+      <guid>https://feeori.github.io/post/0003-redis-2-devops-case/</guid>
+      <description>前言 Redis作为缓存，广泛应用于各种互联网业务。Redis本身设计优美，实现简单，绝大多数情况下，稳定运行，很少碰到故障。但线上场景多种多</description>
+    </item>
+    
+  </channel>
+</rss>

@@ -6,7 +6,16 @@
     <description>Recent content on SKY</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Sun, 28 Feb 2021 17:13:22 +0800</lastBuildDate><atom:link href="https://feeori.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sat, 20 Mar 2021 20:22:49 +0800</lastBuildDate><atom:link href="https://feeori.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Redis：两则线上运维经验</title>
+      <link>https://feeori.github.io/post/0003-redis-2-devops-case/</link>
+      <pubDate>Sat, 20 Mar 2021 20:22:49 +0800</pubDate>
+      
+      <guid>https://feeori.github.io/post/0003-redis-2-devops-case/</guid>
+      <description>前言 Redis作为缓存，广泛应用于各种互联网业务。Redis本身设计优美，实现简单，绝大多数情况下，稳定运行，很少碰到故障。但线上场景多种多</description>
+    </item>
+    
     <item>
       <title>NFS: Docker挂载NFS，间歇报input/output error错</title>
       <link>https://feeori.github.io/post/0002-nfs-input-output-error/</link>
